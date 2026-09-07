@@ -1,0 +1,19 @@
+{
+  "name": "dynamic-social-recovery-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zero-database social recovery: threshold-encrypted guardian payloads on-chain, ZK-Email guardian approvals, 48h timelock.",
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -F sdk build",
+    "test": "pnpm test:contracts && pnpm test:sdk",
+    "test:contracts": "cd contracts && forge test -vvv",
+    "test:invariant": "cd contracts && forge test --match-contract Invariant -vvv",
+    "coverage": "cd contracts && forge coverage --ir-minimum",
+    "test:sdk": "pnpm -F sdk test",
+    "typecheck": "pnpm -F sdk typecheck"
+  },
+  "devDependencies": {
+    "@zk-email/contracts": "^6.3.2"
+  }
+}

@@ -1,0 +1,22 @@
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/.env
+# NOTE: contracts/lib/ is deliberately NOT ignored. `forge install` registers
+# forge-std and openzeppelin-contracts as git submodules, and committing those
+# pointers is what makes the build reproducible at exact dependency versions.
+
+# Node
+node_modules/
+sdk/dist/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.log

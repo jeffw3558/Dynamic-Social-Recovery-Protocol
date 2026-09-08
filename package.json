@@ -15,5 +15,10 @@
   },
   "devDependencies": {
     "@zk-email/contracts": "^6.3.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "use-sync-external-store": "^1.6.0"
+    }
   }
 }

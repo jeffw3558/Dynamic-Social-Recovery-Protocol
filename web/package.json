@@ -1,0 +1,32 @@
+{
+  "name": "@dsrp/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dsrp/sdk": "workspace:*",
+    "@rainbow-me/rainbowkit": "2.2.11",
+    "@tanstack/react-query": "^5.102.8",
+    "next": "16.3.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "viem": "^2.56.3",
+    "wagmi": "2.19.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@x402/core": "^2.25.0",
+    "@x402/evm": "^2.25.0",
+    "@x402/extensions": "^2.25.0",
+    "@x402/svm": "^2.25.0",
+    "typescript": "^5.6.0"
+  }
+}

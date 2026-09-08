@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:crypto";
-import { keccak256, toHex, type Hex } from "viem";
+import { keccak256, toHex } from "viem";
 
 import type { EncryptedPayload, GuardianSet, RecoveryContext } from "../types.js";
 import { assertValidGuardianSet, type GuardianVault } from "./GuardianVault.js";
@@ -57,7 +57,4 @@ export class MockVault implements GuardianVault {
   }
 }
 
-/** Convenience for tests that need a salt without running the real circuit. */
-export function mockAccountSalt(email: string): Hex {
-  return keccak256(toHex(`mock-account-salt:${email.trim().toLowerCase()}`));
-}
+export { devAccountSalt, devAccountSalt as mockAccountSalt } from "./salt.js";

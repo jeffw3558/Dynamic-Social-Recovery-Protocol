@@ -7,6 +7,11 @@
  *   - `chain/`  reads and relayed writes against the recovery contract
  *
  * `command.ts` is the one piece that must stay in lockstep with Solidity.
+ *
+ * This barrel is browser-safe. `MockVault` is deliberately absent: it imports
+ * `node:crypto` and would break any browser bundle that reached it, so the offline
+ * dev vault must be imported explicitly from `@dsrp/sdk/vault/mock`. The dangerous
+ * dependency should require asking for it by name, not arrive by default.
  */
 
 export * from "./types.js";
@@ -17,8 +22,8 @@ export {
   VaultAccessDeniedError,
   type GuardianVault,
 } from "./vault/GuardianVault.js";
-export { MockVault, mockAccountSalt } from "./vault/MockVault.js";
 export { ChipotleVault, type ChipotleConfig } from "./vault/ChipotleVault.js";
+export { devAccountSalt } from "./vault/salt.js";
 
 export {
   asBytes32,
@@ -40,6 +45,7 @@ export { DSRP_ABI } from "./chain/abi.js";
 export {
   chainFor,
   createReader,
+  isExecutable,
   readGuardianPayload,
   readRecoveryStatus,
   readRequest,

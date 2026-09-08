@@ -7,9 +7,40 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./command": {
+      "types": "./dist/command.d.ts",
+      "import": "./dist/command.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
+    "./chain": {
+      "types": "./dist/chain/index.d.ts",
+      "import": "./dist/chain/index.js"
+    },
+    "./email": {
+      "types": "./dist/email/index.d.ts",
+      "import": "./dist/email/index.js"
+    },
+    "./vault": {
+      "types": "./dist/vault/index.d.ts",
+      "import": "./dist/vault/index.js"
+    },
+    "./vault/mock": {
+      "types": "./dist/vault/MockVault.d.ts",
+      "import": "./dist/vault/MockVault.js"
+    },
+    "./lit-actions/guardian-gate.js": "./src/lit-actions/guardian-gate.js"
   },
-  "files": ["dist", "src/lit-actions"],
+  "files": [
+    "dist",
+    "src/lit-actions"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -26,5 +57,7 @@
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

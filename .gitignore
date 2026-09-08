@@ -12,6 +12,12 @@ node_modules/
 sdk/dist/
 *.tsbuildinfo
 
+# Next.js
+web/.next/
+web/out/
+web/next-env.d.ts
+.turbo/
+
 # Env / secrets
 .env
 .env.*

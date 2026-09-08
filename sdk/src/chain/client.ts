@@ -6,18 +6,27 @@ import {
   type HttpTransport,
   type PublicClient,
 } from "viem";
-import { base, baseSepolia } from "viem/chains";
+import { base, baseSepolia, foundry } from "viem/chains";
 
 import { DSRP_ABI } from "./abi.js";
 import type { EncryptedPayload, RecoveryContext, RecoveryRequest } from "../types.js";
 
-export type SupportedChain = typeof base | typeof baseSepolia;
+export type SupportedChain = typeof base | typeof baseSepolia | typeof foundry;
 
-/** Chipotle anchors its PKP permissions on Base, so that is the default home. */
+/**
+ * Chipotle anchors its PKP permissions on Base, so that is the protocol's home.
+ *
+ * `foundry` (31337) is included for local development: the 48-hour timelock is
+ * untestable end-to-end without `evm_increaseTime`, so anvil is the only place the
+ * full lifecycle can actually be exercised.
+ */
 export function chainFor(chainId: number): SupportedChain {
   if (chainId === base.id) return base;
   if (chainId === baseSepolia.id) return baseSepolia;
-  throw new Error(`unsupported chainId ${chainId}; expected ${base.id} or ${baseSepolia.id}`);
+  if (chainId === foundry.id) return foundry;
+  throw new Error(
+    `unsupported chainId ${chainId}; expected ${base.id}, ${baseSepolia.id} or ${foundry.id}`,
+  );
 }
 
 /**
@@ -32,6 +41,29 @@ export type DsrpPublicClient = PublicClient<HttpTransport, SupportedChain>;
 
 export function createReader(ctx: RecoveryContext, rpcUrl: string): DsrpPublicClient {
   return createPublicClient({ chain: chainFor(ctx.chainId), transport: http(rpcUrl) });
+}
+
+/** The inputs that decide whether a request can be executed right now. */
+export interface ExecutabilityInputs {
+  readonly pending: boolean;
+  readonly mature: boolean;
+  readonly proofCount: number;
+  readonly threshold: number;
+}
+
+/**
+ * Whether a request can execute right now.
+ *
+ * Pure and exported deliberately: this same predicate is needed by the reactive
+ * React hooks (which read through wagmi, not through a viem client) and by
+ * {@link readRecoveryStatus}. One definition, so an "Execute" button can never
+ * disagree with the contract about what executable means.
+ *
+ * Mirrors `executeRecovery`'s guards, minus the terminal-state checks already
+ * folded into `pending`.
+ */
+export function isExecutable(input: ExecutabilityInputs): boolean {
+  return input.pending && input.mature && input.proofCount >= input.threshold;
 }
 
 /** Reads a recovery request as a plain object. */
@@ -97,7 +129,12 @@ export async function readRecoveryStatus(
     eta,
     mature,
     pending,
-    executable: pending && mature && request.proofCount >= Number(threshold),
+    executable: isExecutable({
+      pending,
+      mature,
+      proofCount: request.proofCount,
+      threshold: Number(threshold),
+    }),
   };
 }
 

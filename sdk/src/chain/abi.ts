@@ -119,4 +119,32 @@ export const DSRP_ABI = [
     ],
     outputs: [{ name: "", type: "string" }],
   },
+
+  // --- Custom errors ---------------------------------------------------
+  // Generated from contracts/out/DynamicSocialRecovery.sol/DynamicSocialRecovery.json.
+  // Without these, viem cannot decode a revert and the UI shows a bare selector
+  // like `0xa483dd04` instead of "this guardian already approved" — which defeats
+  // the point of the contract having named errors at all.
+  { type: "error", name: "AlreadyApproved", inputs: [{ name: "requestId", type: "uint256" }, { name: "accountSalt", type: "bytes32" }] },
+  { type: "error", name: "CommandMismatch", inputs: [{ name: "expected", type: "string" }, { name: "actual", type: "string" }] },
+  { type: "error", name: "DuplicateGuardian", inputs: [{ name: "accountSalt", type: "bytes32" }] },
+  { type: "error", name: "EmptyPayload", inputs: [] },
+  { type: "error", name: "GuardiansNotConfigured", inputs: [] },
+  { type: "error", name: "InvalidProof", inputs: [] },
+  { type: "error", name: "InvalidThreshold", inputs: [{ name: "given", type: "uint256" }, { name: "guardianCount", type: "uint256" }] },
+  { type: "error", name: "NoSuchRequest", inputs: [{ name: "requestId", type: "uint256" }] },
+  { type: "error", name: "NotAGuardian", inputs: [{ name: "accountSalt", type: "bytes32" }] },
+  { type: "error", name: "NotOwner", inputs: [] },
+  { type: "error", name: "NullifierAlreadyUsed", inputs: [{ name: "emailNullifier", type: "bytes32" }] },
+  { type: "error", name: "RecoveryInFlight", inputs: [{ name: "requestId", type: "uint256" }] },
+  { type: "error", name: "RequestNotPending", inputs: [{ name: "requestId", type: "uint256" }] },
+  { type: "error", name: "SameOwner", inputs: [] },
+  { type: "error", name: "StaleEmail", inputs: [{ name: "emailTimestamp", type: "uint256" }, { name: "requestTimestamp", type: "uint64" }] },
+  { type: "error", name: "StringsInsufficientHexLength", inputs: [{ name: "value", type: "uint256" }, { name: "length", type: "uint256" }] },
+  { type: "error", name: "ThresholdNotMet", inputs: [{ name: "have", type: "uint32" }, { name: "want", type: "uint256" }] },
+  { type: "error", name: "TimelockNotElapsed", inputs: [{ name: "nowTs", type: "uint256" }, { name: "eta", type: "uint256" }] },
+  { type: "error", name: "TooManyGuardians", inputs: [{ name: "given", type: "uint256" }, { name: "max", type: "uint256" }] },
+  { type: "error", name: "UntrustedDKIMKey", inputs: [{ name: "domainName", type: "string" }, { name: "publicKeyHash", type: "bytes32" }] },
+  { type: "error", name: "ZeroAddress", inputs: [] },
+  { type: "error", name: "ZeroSalt", inputs: [] },
 ] as const;

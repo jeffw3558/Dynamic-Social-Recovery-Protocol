@@ -8,6 +8,7 @@ import {
   InMemoryRelayStore,
   loadPolicy,
   parseEmailProof,
+  parseRequestId,
   PolicyError,
   withNonceLock,
   worstCaseCostWei,
@@ -270,5 +271,23 @@ describe("parseEmailProof", () => {
     } catch (e) {
       expect((e as PolicyError).status).toBe(400);
     }
+  });
+});
+
+describe("parseRequestId", () => {
+  it("accepts decimal strings and numbers", () => {
+    expect(parseRequestId("42")).toBe(42n);
+    expect(parseRequestId(1)).toBe(1n);
+  });
+
+  it("rejects garbage with a readable message instead of a raw SyntaxError", () => {
+    expect(() => parseRequestId("abc")).toThrow(/must be an integer/);
+    expect(() => parseRequestId(null)).toThrow(/must be a string or number/);
+    expect(() => parseRequestId({})).toThrow(/must be a string or number/);
+  });
+
+  it("rejects 0 and negatives, since request ids start at 1", () => {
+    expect(() => parseRequestId("0")).toThrow(/must be positive/);
+    expect(() => parseRequestId("-3")).toThrow(/must be positive/);
   });
 });

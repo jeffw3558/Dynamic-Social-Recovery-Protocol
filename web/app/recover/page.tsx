@@ -2,7 +2,7 @@
 
 import { DSRP_ABI } from "@dsrp/sdk/chain";
 import { canonicalCommand } from "@dsrp/sdk/command";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Hex } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -21,7 +21,21 @@ export default function RecoverPage() {
 
   const state = useDsrpState(contract);
   const [manualId, setManualId] = useState("");
-  const watchedId = manualId ? BigInt(manualId) : state.activeRequestId;
+
+  // Executing or cancelling clears `activeRequestId`, which would unmount the
+  // request card at the exact moment it matters most — the user clicks the most
+  // consequential button in the app and the confirmation disappears with it. Hold
+  // the last id seen so the outcome stays on screen.
+  const [lastSeenId, setLastSeenId] = useState(0n);
+  useEffect(() => {
+    if (state.activeRequestId > 0n) setLastSeenId(state.activeRequestId);
+  }, [state.activeRequestId]);
+
+  const watchedId = manualId
+    ? BigInt(manualId)
+    : state.activeRequestId > 0n
+      ? state.activeRequestId
+      : lastSeenId;
   const status = useRecoveryStatus(contract, watchedId);
 
   const [newOwner, setNewOwner] = useState("");
@@ -64,6 +78,8 @@ export default function RecoverPage() {
   };
 
   const hasActive = state.activeRequestId > 0n;
+  // A just-finished request still occupies the page until dismissed.
+  const showingOutcome = !hasActive && watchedId > 0n && Boolean(status.request);
   const command =
     status.request && contract
       ? canonicalCommand({ contractAddress: contract, chainId: CHAIN_ID }, watchedId, status.request.newOwner)
@@ -85,7 +101,7 @@ export default function RecoverPage() {
 
       <ContractPicker contract={contract} onChange={setContract} onClear={clear} />
 
-      {!hasActive && (
+      {!hasActive && !showingOutcome && (
         <div className="card">
           <h2>Start a recovery</h2>
           <p className="sub">
@@ -128,7 +144,7 @@ export default function RecoverPage() {
         </div>
       )}
 
-      {!hasActive && (
+      {!hasActive && !showingOutcome && (
         <div className="card">
           <h2>Track an existing request</h2>
           <p className="sub">Already started one? Enter its id.</p>
@@ -190,6 +206,26 @@ export default function RecoverPage() {
                       : `Waiting on ${status.threshold - status.request.proofCount} more approval(s).`
                 }
               />
+            )}
+
+            {status.request.executed && (
+              <>
+                <p className="note ok">
+                  Recovery complete. This wallet is now owned by{" "}
+                  <span className="mono">{shorten(status.request.newOwner, 6)}</span>.
+                </p>
+                <div className="row" style={{ marginTop: 14 }}>
+                  <button
+                    className="ghost"
+                    onClick={() => {
+                      setLastSeenId(0n);
+                      setManualId("");
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
             )}
 
             {status.request.cancelled && (

@@ -26,24 +26,10 @@ export function GuardianSetEditor({
 }) {
   const [showSalts, setShowSalts] = useState(false);
 
-  const validation = useMemo(() => {
-    const filled = guardians.filter((g) => g.email.trim() !== "");
-    if (filled.length === 0) return { ok: false, reason: "Add at least one guardian." };
-    try {
-      // Same preconditions the contract enforces, so the form fails for the same
-      // reasons the chain would rather than reverting after gas is spent.
-      assertValidGuardianSet({
-        threshold,
-        guardians: filled.map((g) => ({
-          email: g.email,
-          accountSalt: (g.accountSalt || devAccountSalt(g.email)) as Hex,
-        })),
-      });
-      return { ok: true as const };
-    } catch (e) {
-      return { ok: false, reason: e instanceof Error ? e.message : String(e) };
-    }
-  }, [guardians, threshold]);
+  const validation = useMemo(
+    () => validateGuardianDraft(guardians, threshold),
+    [guardians, threshold],
+  );
 
   const update = (index: number, patch: Partial<GuardianDraft>) => {
     onChange(
@@ -139,6 +125,33 @@ export function GuardianSetEditor({
       )}
     </div>
   );
+}
+
+/**
+ * Whether this draft would be accepted on-chain.
+ *
+ * Exported so the page can disable Publish rather than letting a click fail at the
+ * API. Runs the same {@link assertValidGuardianSet} the contract's preconditions
+ * mirror, so the form rejects for exactly the reasons the chain would.
+ */
+export function validateGuardianDraft(
+  guardians: GuardianDraft[],
+  threshold: number,
+): { ok: boolean; reason?: string } {
+  const filled = guardians.filter((g) => g.email.trim() !== "");
+  if (filled.length === 0) return { ok: false, reason: "Add at least one guardian." };
+  try {
+    assertValidGuardianSet({
+      threshold,
+      guardians: filled.map((g) => ({
+        email: g.email,
+        accountSalt: (g.accountSalt || devAccountSalt(g.email)) as Hex,
+      })),
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 export function resolveSalts(guardians: GuardianDraft[]) {

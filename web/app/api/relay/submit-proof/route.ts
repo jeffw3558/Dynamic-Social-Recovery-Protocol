@@ -9,6 +9,7 @@ import {
   assertContractAllowed,
   loadPolicy,
   parseEmailProof,
+  parseRequestId,
   PolicyError,
   relayStore,
   withNonceLock,
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
     assertChainAllowed(policy, body.chainId);
 
     const ctx = { contractAddress: body.contractAddress, chainId: body.chainId };
-    const requestId = BigInt(body.requestId);
+    const requestId = parseRequestId(body.requestId);
     const rpcUrl = process.env.RELAYER_RPC_URL ?? "http://127.0.0.1:8545";
 
     const client = createReader(ctx, rpcUrl);

@@ -8,7 +8,12 @@ import { useAccount, useWalletClient } from "wagmi";
 import { ApprovalProgress } from "@/components/ApprovalProgress";
 import { ContractPicker } from "@/components/ContractPicker";
 import { CountdownToEta } from "@/components/CountdownToEta";
-import { GuardianSetEditor, resolveSalts, type GuardianDraft } from "@/components/GuardianSetEditor";
+import {
+  GuardianSetEditor,
+  resolveSalts,
+  validateGuardianDraft,
+  type GuardianDraft,
+} from "@/components/GuardianSetEditor";
 import { RecoveryKitCard, type RecoveryKit } from "@/components/RecoveryKitCard";
 import { TxButton } from "@/components/TxButton";
 import { useContractAddress } from "@/hooks/useContractAddress";
@@ -35,6 +40,8 @@ export default function OwnerPage() {
 
   const isOwner =
     Boolean(address) && Boolean(state.owner) && address?.toLowerCase() === state.owner?.toLowerCase();
+
+  const draft = validateGuardianDraft(guardians, threshold);
 
   if (!ready) return null;
 
@@ -65,8 +72,10 @@ export default function OwnerPage() {
       }),
     });
     if (!res.ok) {
-      const detail = await res.text();
-      throw new Error(`Encryption failed: ${detail.slice(0, 200)}`);
+      // The route answers with { error }; surfacing the raw body would put a JSON
+      // blob in front of the user.
+      const detail = await res.json().catch(() => ({}) as { error?: string });
+      throw new Error(detail.error ?? `Encryption failed (${res.status})`);
     }
     const { ciphertext, hash } = (await res.json()) as { ciphertext: Hex; hash: Hex };
 
@@ -213,10 +222,16 @@ export default function OwnerPage() {
             label="Publish guardian set"
             pendingLabel="Encrypting and publishing…"
             chainId={CHAIN_ID}
-            disabled={!isOwner || state.activeRequestId > 0n}
+            disabled={!isOwner || state.activeRequestId > 0n || !draft.ok}
             onSend={publishPayload}
             onConfirmed={state.refetch}
-            hint={!isConnected ? "Connect the owner wallet to publish." : undefined}
+            hint={
+              !isConnected
+                ? "Connect the owner wallet to publish."
+                : !draft.ok
+                  ? draft.reason
+                  : undefined
+            }
           />
           {encryptError && (
             <p className="note danger" style={{ marginTop: 12 }}>

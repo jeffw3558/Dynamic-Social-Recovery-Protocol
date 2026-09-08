@@ -161,6 +161,27 @@ export function assertAffordable(
  *                             REQUEST VALIDATION                             *
  * ------------------------------------------------------------------------- */
 
+/**
+ * Parse a request id.
+ *
+ * `BigInt("abc")` throws a raw SyntaxError that would reach the caller as an
+ * opaque 400 — the same leaked-internal-error shape {@link parseEmailProof}
+ * exists to prevent.
+ */
+export function parseRequestId(input: unknown): bigint {
+  if (typeof input !== "string" && typeof input !== "number") {
+    throw new PolicyError("requestId must be a string or number", 400);
+  }
+  let id: bigint;
+  try {
+    id = BigInt(input);
+  } catch {
+    throw new PolicyError(`requestId must be an integer, got ${JSON.stringify(input)}`, 400);
+  }
+  if (id <= 0n) throw new PolicyError("requestId must be positive; ids start at 1", 400);
+  return id;
+}
+
 /** The proof struct, after crossing JSON and being checked field by field. */
 export interface ParsedEmailProof {
   domainName: string;
